@@ -90,7 +90,7 @@ class TicketReplyCommentHandler(SyncHandler):
         """
         # TODO: May not need this for Reply. If needed, will need changes anyway.
         result = re.search(
-            r"\{panel\}(.*)\{panel\}",
+            r"\{panel:[a-zA-Z0-9=#]*\}(.*)\{panel\}",
             jira_comment,
             flags=re.S
         )
