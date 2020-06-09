@@ -101,6 +101,12 @@ SYNC = {
             "issue_type": "Task"
         },
     },
+    "tickets": {
+        "syncer": "sg_jira.TicketIssueSyncer",
+        "settings": {
+            "issue_type": "Task"
+        },
+    },
     "asset_hierarchy": {
         # The syncer class to use
         "syncer": "asset_hierarchy.AssetHierarchySyncer",
