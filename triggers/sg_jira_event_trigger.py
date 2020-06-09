@@ -48,6 +48,7 @@ def registerCallbacks(reg):
         "Shotgun_Note_Change": ["*"],
         "Shotgun_Task_Change": ["*"],
         "Shotgun_Ticket_Change": ["*"],
+        "Shotgun_Reply_Change": ["*"],
         "Shotgun_Project_Change": ["*"],
         "Shotgun_Asset_Change": ["*"],  # Needed by the Asset/Task example.
         # These events require a reset of the bridge to ensure our cached schema
