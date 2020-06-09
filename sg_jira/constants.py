@@ -52,6 +52,7 @@ SG_ENTITY_SPECIAL_NAME_FIELDS = {
     "Tag": "name",
     "Ticket": "title",
     "ApiUser": "name",
+    "Reply": None,  # Replies don't have a name / code
 }
 
 # Jira search methods use some paging

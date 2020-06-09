@@ -218,13 +218,11 @@ class ShotgunSession(object):
         needed_fields = []
         entity_type = shotgun_entity["type"]
         name_field = self.get_entity_name_field(entity_type)
-
+        needed_fields = [name_field] if name_field else []
         if entity_type == "HumanUser":
-            needed_fields = [name_field, "email"]
-        elif entity_type == "Task":
-            needed_fields = [name_field, "task_assignees"]
-        else:
-            needed_fields = [name_field]
+            needed_fields = needed_fields + ["email"]
+        if entity_type == "Task":
+            needed_fields = needed_fields + ["task_assignees"]
 
         if self.is_project_entity(shotgun_entity["type"]):
             needed_fields.append("project")
@@ -251,7 +249,7 @@ class ShotgunSession(object):
             shotgun_entity = consolidated
 
         # Ensure a consistent way to retrieve the Entity name
-        if name_field != "name":
+        if name_field and name_field != "name":
             shotgun_entity["name"] = shotgun_entity[name_field]
         return shotgun_entity
 
