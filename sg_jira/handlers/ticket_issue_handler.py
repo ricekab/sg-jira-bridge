@@ -146,6 +146,7 @@ class TicketIssueHandler(EntityIssueHandler):
                          "sg_due_date",
                          "addressings_to",
                          "sg_estimate",
+                         "tags",
                          SHOTGUN_JIRA_ID_FIELD,
                          SHOTGUN_SYNC_IN_JIRA_FIELD,
                          SHOTGUN_JIRA_URL_FIELD]
