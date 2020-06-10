@@ -395,13 +395,9 @@ class TicketReplyCommentHandler(SyncHandler):
             self._logger.debug("Rejecting event without a webhookEvent: %s" % event)
             return False
 
-        if webhook_event != "comment_updated":
-            self._logger.debug(
-                "Rejecting event with unsupported webhookEvent %s. Handler only "
-                "accepts comment_updated events: %s" % (
-                    webhook_event,
-                    event
-                )
+        if webhook_event == "comment_deleted":
+            self._logger.warning(
+                "Not handling 'comment_deleted' event. Event data: %s" % (event)
             )
             return False
 
@@ -442,6 +438,16 @@ class TicketReplyCommentHandler(SyncHandler):
                     sg_replies)
             )
             return False
+        sg_data = {}
+        try:
+            sg_data["content"] = self._compose_shotgun_reply(jira_comment["body"])
+        except InvalidJiraValue as e:
+            msg = "Unable to process Jira Comment %s event. %s" % (
+                webhook_event,
+                e)
+            self._logger.debug(msg, exc_info=True)
+            self._logger.warning(msg)
+            return False
         if len(sg_replies) == 1:  # Update existing Reply
             # TODO: Check that the Ticket the Reply is linked to has syncing enabled.
             #       Otherwise syncing could be turned off for the Task but this
@@ -454,18 +460,6 @@ class TicketReplyCommentHandler(SyncHandler):
                     sg_replies[0]["id"])
             )
             self._logger.debug("Jira event: %s" % event)
-
-            sg_data = {}
-            try:
-                sg_data["content"] = self._compose_shotgun_reply(jira_comment["body"])
-            except InvalidJiraValue as e:
-                msg = "Unable to process Jira Comment %s event. %s" % (
-                    webhook_event,
-                    e)
-                self._logger.debug(msg, exc_info=True)
-                self._logger.warning(msg)
-                return False
-
             self._logger.debug(
                 "Updating Shotgun Note %d (jira_key:%s) with data: %s" % (
                     sg_replies[0]["id"],
@@ -481,7 +475,24 @@ class TicketReplyCommentHandler(SyncHandler):
         if not sg_replies:
             self._logger.warning("No existing reply found. New reply should be made but currently "
                                  "not implemented.")
-            # TODO: Create new Reply
+            ticket = self._shotgun.find_one("Ticket",
+                                            [[SHOTGUN_JIRA_ID_FIELD, "is", jira_issue["key"]]])
+            if ticket is None:
+                self._logger.warning(
+                    "Could not find a Ticket associatied with {}. No reply is created."
+                    "".format(jira_issue["key"])
+                )
+                return False
+            sg_data.update(
+                {SHOTGUN_JIRA_ID_FIELD: sg_jira_key,
+                 "entity": ticket,
+                 "content": self._compose_shotgun_reply(jira_comment["body"]),
+                 # "user": None,
+                 })
+            self._shotgun.create(
+                "Reply",
+                sg_data
+            )
 
     def _sync_shotgun_ticket_replies_to_jira(self, sg_ticket):
         """
